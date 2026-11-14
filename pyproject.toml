@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "maf-harness"
+version = "0.0.1"
+description = "MAF Harness: quality engineering on a real repository, on Microsoft Agent Framework"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+aqh = "aqh.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["aqh*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
