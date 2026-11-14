@@ -15,6 +15,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update && sudo apt-get install -y bubblewrap
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
       - run: python -m pip install -e . pytest
-      - run: python -m pytest -q
+      - if: runner.os == 'Linux'
+        run: python -c "from aqh.sandbox import kind; assert kind() == 'bubblewrap', kind()"
+      - if: runner.os == 'macOS'
+        run: python -c "from aqh.sandbox import kind; assert kind() == 'seatbelt', kind()"
+      - run: python -m pytest -q -rs
       - run: aqh doctor

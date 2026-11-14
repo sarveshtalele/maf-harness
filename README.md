@@ -1,10 +1,10 @@
-# MAF Harness (`aqh`)
+# aqh
 
 A quality-engineering harness on Microsoft Agent Framework (MAF): an agent that works on a real repository, steered by
 **guides** (what good output looks like, given before it acts) and checked by **sensors** (deterministic checks first,
 model judgement only where needed), with a named person at every gate.
 
-Separate from Agentic QE Platform. It starts as a command-line tool (`aqh`); other clients come later.
+Separate from Agentic QE Platform. Clients: the `aqh` command line and a Tauri desktop app; no web client for now.
 
 | Status | |
 |---|---|

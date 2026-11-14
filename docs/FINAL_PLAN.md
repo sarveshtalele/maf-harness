@@ -1,13 +1,21 @@
-# MAF Harness: final plan (feature by feature)
+# aqh: final plan (feature by feature)
 
 Owner direction, 2026-11-14: build the harness in this repository only, reuse the code we have, do not repeat the
 mistakes, list every feature, **code with Sonnet and review with Opus**. CLI first; fully separate from Agentic QE
-Platform. The design behind it: `HARNESS_PLAN.md` (guides and sensors) and `HARNESS_ENGINEERING.md` (architecture, the
+Platform.
+
+Owner changes, 2026-11-14 (later the same day): the product and its command are both **`aqh`** (package `aqh`, settings
+prefix `AQH_`); module names are descriptive (`model_gateway`, `event_log`, `turn_machine`, `sandbox`, ...), never the
+legacy names (`harness_kit`, `unique_calls`, `AQE_*`). Clients: the **CLI and a Tauri desktop app**; no web client for
+now. Order: **sandbox first**, then the core, then the CLI, then the desktop app (section 5). Haiku joins the build loop
+as a helper (section 1). The design behind it: `HARNESS_PLAN.md` (guides and sensors) and `HARNESS_ENGINEERING.md` (architecture, the
 15 measured mistakes M1 to M15, patterns).
 
 ## 1. How every feature is built
 
 ```
+Haiku (helper agent)         reads the legacy and platform code a feature reuses and summarises it for the brief;
+                             searches; runs commands. It writes no harness code
 Opus (this session's lead)   picks the next feature from section 4, writes its brief: goal, files, legacy to reuse,
                              mistakes to avoid, acceptance tests
 Sonnet (implementer agent)   ports or writes the code and its tests, runs pytest, reports the real output
@@ -51,7 +59,7 @@ Opus (lead)                  checks the tests passed, updates the tracker (secti
 
 | ID | Feature | Phase | Reuses | Must avoid | Guides and sensors | Acceptance |
 |---|---|---|---|---|---|---|
-| F01 | CLI shell: `aqh`, `aqh -p` headless, `--continue`, config and keychain for the model key | H6 (shell now, full later) | `legacy/src/aqh/*` | M1 | — | interactive and headless runs on 3 OS; key never printed |
+| F01 | CLI: `aqh`, `aqh -p` headless, `--continue`, config and keychain for the model key | H6 | `legacy/src/aqh/*` | M1 | — | interactive and headless runs on 3 OS; key never printed |
 | F02 | Model gateway: OpenAI-compatible client, unique call ids, retry with Retry-After, stall detection, circuit breaker, typed cost, I/O capture | H1 | `unique_calls.py`, platform `maf/llm.py` | M11, M12 | — | recorded 429 and stall replays resume; cost per turn reported |
 | F03 | Session event log: append-only JSONL, tool call logged before it runs, resume, replay | H1 | `snapshots.py` ideas | M8, M11 | — | kill mid-tool, resume, no lost or doubled call |
 | F04 | Turn state machine and approvals: Idle, CallingModel, AwaitingApproval, RunningTool, StepCheck, Done; parallel approval batches | H1 | approval lessons (M8 fix) | M4, M8, M13 | — | batches of 1, 3 and 5 approvals; deny and timeout paths |
@@ -69,12 +77,13 @@ Opus (lead)                  checks the tests passed, updates the tracker (secti
 | F16 | Inferential sensors and mutation testing of generated tests; harness coverage report | H5 | plugin reviewer agents | M14 | sensors: reviewers, judge, mutation score | coverage report per stage from seeded defects |
 | F17 | Observability: per-turn metrics, OpenTelemetry spans, evidence folder per run | H1 onward | run capture from the platform live runner | M12 | — | every turn writes its metrics line |
 | F18 | Evals and replay: record a live session, replay with a stub model, discovery eval scorer | H1 onward | `test_discovery_eval_scoring.py`, platform `maf/evals/discovery.py` (commit `94aa26a^`) | M14 | — | replay of a recorded live session passes in CI |
+| F20 | Desktop app (Tauri): sessions, transcript, approval cards from the tool's schema, diff view; runs the core as a local child process over stdio, no server, no web client | H6 | — (legacy Electron app is not reused) | M1, M8 | — | builds on 3 OS; an approval card approves a real tool call |
 | F19 | Live acceptance: the agentic-qe cycle to Gate 5 on two repositories | H7 | `test_qe_cycle_live.py` | all | all of the above | every stage 180 s or less, 40 tool calls or fewer, Gates 0 to 5 in the plugin ledger |
 
 ## 5. Order
 
-H1: F02, F03, F04, F05, F17, F18 (core, testable offline). H2: F06, F07, F08, F09, F10, F13. H3: F11, F12. H4: F15.
-H5: F14, F16. H6: F01 complete. H7: F19. One feature at a time through section 1's loop; the next starts only when the
+H1 (sandbox first): F07, F09, F08. H2 (core, testable offline): F02, F03, F04, F05, F17, F18. H3: F06, F10, F13.
+H4: F11, F12. H5: F15. H6: F14, F16. H7 (clients): F01 CLI, then F20 desktop. H8: F19. No web client for now. One feature at a time through section 1's loop; the next starts only when the
 previous one is done and committed.
 
 ## 6. Tracker
@@ -82,4 +91,7 @@ previous one is done and committed.
 | ID | State | Evidence |
 |---|---|---|
 | H0 | done | `b44f7b8`: CLI skeleton, CI on 3 OS, `legacy/` |
-| F01 to F19 | not started | |
+| F07 | done locally, CI pending | `src/aqh/workspace.py`: path guard (root-relative, symlinks resolved, `.git` `.venv` `node_modules` write-protected, UNC and other drives refused on Windows). Opus review: 14 findings, all fixed. 23 tests pass on macOS with the real Seatbelt (2026-11-14) |
+| F09 | done locally, CI pending | `src/aqh/sandbox.py`: Seatbelt and bubblewrap (`--unshare-pid`, `--unshare-net`), credential folders hidden, unix sockets limited, Docker sockets denied, clean allowlist environment without the harness venv. Ceilings: Launch Services cut-off not proven by a test (commands using `open` go through approval); bubblewrap path sockets reachable. Linux bubblewrap runs only in CI |
+| F08 | done locally, CI pending | `src/aqh/shell.py`, `src/aqh/redact.py`: every command a fresh process at the workspace root (`cd` and variables never carry), output to files then bounded reads, spill over 30,000 characters, process-group kill on timeout and after exit, background tasks with time and log caps, redaction ported from the platform (`94aa26a`) with fewer false positives. Opus review: 10 findings (blocker: a background child held the pipe until timeout), all fixed. Full suite 77 passed, 1 skipped (no PowerShell on this Mac) with the real Seatbelt (2026-11-14) |
+| F01 to F06, F10 to F20 | not started | |

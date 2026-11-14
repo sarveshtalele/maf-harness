@@ -124,7 +124,7 @@ todo loop and AG-UI's collected-approval store (mistakes M4 and M8).
 
 1. **Location:** `~/Downloads/maf-harness`, with the GitHub repository `sarveshtalele/maf-harness` (public: no secrets,
    private hostnames or customer code may be committed).
-2. **Clients:** the CLI (`aqh`) first.
+2. **Clients:** the CLI (`aqh`) first, then a Tauri desktop app; no web client for now (owner, 2026-11-14).
 3. **Relation to the platform:** fully separate; no connection now.
 
 H0 done: repository, CI on 3 OS, `legacy/` copied from `feature/harness-rebuild` (`dfe25c3`), commit `b44f7b8`.
