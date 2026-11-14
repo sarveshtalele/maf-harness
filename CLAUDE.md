@@ -1,7 +1,7 @@
 # MAF Harness project rules
 
-A quality-engineering harness on Microsoft Agent Framework (MAF). Plan: `docs/HARNESS_PLAN.md` (phases H0 to H7, in
-order). Design and the 15 mistakes not to repeat: `docs/HARNESS_ENGINEERING.md`.
+A quality-engineering harness on Microsoft Agent Framework (MAF). **Restart point: `docs/FINAL_PLAN.md`** (features F01 to
+F19, order in its section 5, tracker in section 6; code with Sonnet, review with Opus). Model: `docs/HARNESS_PLAN.md`. Design and the 15 mistakes not to repeat: `docs/HARNESS_ENGINEERING.md`.
 
 ## Never without the owner's explicit permission
 

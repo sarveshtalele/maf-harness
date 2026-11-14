@@ -9,7 +9,7 @@ Separate from Agentic QE Platform. It starts as a command-line tool (`aqh`); oth
 | Status | |
 |---|---|
 | Phase | H0: repository, CI, legacy reference copy |
-| Plan | [`docs/HARNESS_PLAN.md`](docs/HARNESS_PLAN.md) (version 2: guides and sensors) |
+| Plan | [`docs/FINAL_PLAN.md`](docs/FINAL_PLAN.md) (every feature, order, tracker); [`docs/HARNESS_PLAN.md`](docs/HARNESS_PLAN.md) (guides and sensors) |
 | Design and lessons | [`docs/HARNESS_ENGINEERING.md`](docs/HARNESS_ENGINEERING.md) (15 measured mistakes, patterns, state machine) |
 | Origin | [`docs/HARNESS_SEPARATION_PLAN.md`](docs/HARNESS_SEPARATION_PLAN.md), [`legacy/PROVENANCE.md`](legacy/PROVENANCE.md) |
 
